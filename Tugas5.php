@@ -1,54 +1,118 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Program Diskon Belanja</title>
-</head>
-<body>
-
-<h2>Program Diskon Belanja</h2>
-
-<form method="post">
-    <label>Apakah memiliki kartu member?</label><br>
-    <select name="kartu">
-        <option value="ya">Ya</option>
-        <option value="tidak">Tidak</option>
-    </select><br><br>
-
-    <label>Total Belanja:</label><br>
-    <input type="number" name="totalBelanja" required><br><br>
-
-    <button type="submit" name="proses">Proses</button>
-</form>
-
 <?php
-if (isset($_POST['proses'])) {
 
-    $kartu = $_POST['kartu'];
-    $totalBelanja = $_POST['totalBelanja'];
-    $diskon = 0;
+function formatRupiah($angka): string {
+    return "Rp " . number_format($angka, 0, ',', '.');
+}
 
-    // Logika sesuai flowchart
-    if ($kartu == "ya") {
-        if ($totalBelanja > 500000) {
-            $diskon = 50000;
-        } elseif ($totalBelanja > 100000) {
-            $diskon = 15000;
-        }
-    } else {
-        if ($totalBelanja > 100000) {
-            $diskon = 5000;
+class BelanjaToko {
+
+    public $namaPembeli;
+    public $member;
+    public $totalBelanja;
+
+    public function hitungDiskon(): int {
+
+        if ($this->member == "Memiliki") {
+
+            if ($this->totalBelanja > 500000) {
+                return 50000;
+            } elseif ($this->totalBelanja > 100000) {
+                return 15000;
+            } else {
+                return 0;
+            }
+
+        } else {
+
+            if ($this->totalBelanja > 100000) {
+                return 5000;
+            } else {
+                return 0;
+            }
+
         }
     }
 
-    $totalBayar = $totalBelanja - $diskon;
-
-    echo "<hr>";
-    echo "Kartu Member: $kartu <br>";
-    echo "Total Belanja: Rp " . number_format($totalBelanja, 0, ',', '.') . "<br>";
-    echo "Diskon: Rp " . number_format($diskon, 0, ',', '.') . "<br>";
-    echo "<b>Total Bayar: Rp " . number_format($totalBayar, 0, ',', '.') . "</b>";
+    public function hitungTotal(): int {
+        $diskon = $this->hitungDiskon();
+        return $this->totalBelanja - $diskon;
+    }
 }
-?>
 
-</body>
-</html>
+$dataBelanja = [
+
+    [
+        "nama" => "Pembeli 1",
+        "member" => "Memiliki",
+        "belanja" => 200000
+    ],
+
+    [
+        "nama" => "Pembeli 2",
+        "member" => "Memiliki",
+        "belanja" => 570000
+    ],
+
+    [
+        "nama" => "Pembeli 3",
+        "member" => "Tidak Memiliki",
+        "belanja" => 120000
+    ],
+
+    [
+        "nama" => "Pembeli 4",
+        "member" => "Tidak Memiliki",
+        "belanja" => 90000
+    ]
+
+];
+
+$no = 1;
+
+foreach ($dataBelanja as $data) {
+
+    echo "<h3>TRANSAKSI $no</h3>";
+
+    $errors = [];
+
+    $nama = $data["nama"];
+    $member = $data["member"];
+    $belanja = $data["belanja"];
+
+    // VALIDASI
+    if (empty($nama)) {
+        $errors[] = "Nama pembeli tidak boleh kosong.";
+    }
+
+    if ($belanja <= 0) {
+        $errors[] = "Total belanja harus lebih dari 0.";
+    }
+
+    if (!empty($errors)) {
+
+        foreach ($errors as $error) {
+            echo $error . "<br>";
+        }
+
+    } else {
+
+        $toko = new BelanjaToko();
+        $toko->namaPembeli = $nama;
+        $toko->member = $member;
+        $toko->totalBelanja = $belanja;
+
+        $diskon = $toko->hitungDiskon();
+        $total = $toko->hitungTotal();
+
+        echo "Pembeli : $toko->namaPembeli<br>";
+        echo "Kartu Member : $toko->member<br>";
+        echo "Total Belanja : " . formatRupiah($toko->totalBelanja) . "<br>";
+        echo "Diskon : " . formatRupiah($diskon) . "<br>";
+        echo "<b>Total Bayar : " . formatRupiah($total) . "</b><br><br>";
+
+    }
+
+    $no++;
+}
+
+?>
