@@ -1,0 +1,10 @@
+<?php
+
+echo "Silahkan masukan username: ";
+
+$input_name = fopen("php://stdin", "r");
+$name = trim(fgets($input_name));
+
+echo "Welcome, $name\n";
+
+?>
